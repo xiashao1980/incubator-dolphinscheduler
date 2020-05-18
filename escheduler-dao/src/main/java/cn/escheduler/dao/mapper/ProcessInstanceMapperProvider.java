@@ -60,6 +60,7 @@ public class ProcessInstanceMapperProvider {
                 VALUES("`schedule_time`", "#{processInstance.scheduleTime}");
                 VALUES("`command_start_time`", "#{processInstance.commandStartTime}");
                 VALUES("`global_params`", "#{processInstance.globalParams}");
+                VALUES("`user_data`", "#{processInstance.userData}");  //xsc,2020.5.17 for user data custom.
                 VALUES("`process_instance_json`", "#{processInstance.processInstanceJson}");
                 VALUES("`locations`", "#{processInstance.locations}");
                 VALUES("`connects`", "#{processInstance.connects}");
@@ -136,6 +137,7 @@ public class ProcessInstanceMapperProvider {
                 SET("`command_start_time`=#{processInstance.commandStartTime}");
                 SET("`process_instance_json`=#{processInstance.processInstanceJson}");
                 SET("`global_params`=#{processInstance.globalParams}");
+                SET("`user_data`=#{processInstance.userData}");     //xsc,2020.5.17 for user data custom.
                 SET("`locations`=#{processInstance.locations}");
                 SET("`connects`=#{processInstance.connects}");
                 SET("`history_cmd`=#{processInstance.historyCmd}");
@@ -167,6 +169,10 @@ public class ProcessInstanceMapperProvider {
                 if(parameter.get("processJson") != null){
                     SET("`process_instance_json`=#{processJson}");
                     SET("`global_params`=#{globalParams}");
+                }
+
+                if(parameter.get("userData") != null){
+                    SET("`user_data`=#{userData}");
                 }
                 if(parameter.get("locations") != null){
                     SET("`locations`=#{locations}");

@@ -189,6 +189,10 @@ public class MasterServer implements CommandLineRunner, IStoppable {
 
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(MasterServer.class);
+
+        //按文档要求加入: https://dolphinscheduler.apache.org/zh-cn/docs/1.2.0/user_doc/development-environment-setup.html
+
+        System.setProperty("spring.profiles.active","master");
         app.run(args);
     }
 

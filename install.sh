@@ -36,17 +36,17 @@ source ${workDir}/conf/config/install_config.conf
 
 # mysql配置
 # mysql 地址,端口
-mysqlHost="192.168.xx.xx:3306"
+mysqlHost="192.168.183.128:3306"
 
 # mysql 数据库名称
 mysqlDb="escheduler"
 
 # mysql 用户名
-mysqlUserName="xx"
+mysqlUserName="dsdba"
 
 # mysql 密码
 # 注意：如果有特殊字符，请用 \ 转移符进行转移
-mysqlPassword="xx"
+mysqlPassword="iPbn5k@w"
 
 # conf/config/install_config.conf配置
 # 注意：安装路径,不要当前路径(pwd)一样
@@ -57,7 +57,7 @@ installPath="/data1_1T/escheduler"
 deployUser="escheduler"
 
 # zk集群
-zkQuorum="192.168.xx.xx:2181,192.168.xx.xx:2181,192.168.xx.xx:2181"
+zkQuorum= "192.168.183.128:2181"  #"192.168.xx.xx:2181,192.168.xx.xx:2181,192.168.xx.xx:2181"
 
 # 安装hosts
 # 注意：安装调度的机器hostname列表，如果是伪分布式，则只需写一个伪分布式hostname即可

@@ -44,6 +44,7 @@ public class CommandMapperProvider {
                 VALUES("`process_definition_id`", "#{command.processDefinitionId}");
                 VALUES("`executor_id`", "#{command.executorId}");
                 VALUES("`command_param`", "#{command.commandParam}");
+                VALUES("`user_data`", "#{command.userData}");
                 VALUES("`task_depend_type`", EnumFieldUtil.genFieldStr("command.taskDependType", TaskDependType.class));
                 VALUES("`failure_strategy`", EnumFieldUtil.genFieldStr("command.failureStrategy", FailureStrategy.class));
                 VALUES("`warning_type`", EnumFieldUtil.genFieldStr("command.warningType", WarningType.class));

@@ -402,6 +402,7 @@ public class ProcessInstanceService extends BaseDAGService {
             }
             processInstance.setProcessInstanceJson(processInstanceJson);
             processInstance.setGlobalParams(globalParams);
+            //processInstance.setUserData();
         }
 //        int update = processDao.updateProcessInstance(processInstanceId, processInstanceJson,
 //                globalParams, schedule, flag, locations, connects);

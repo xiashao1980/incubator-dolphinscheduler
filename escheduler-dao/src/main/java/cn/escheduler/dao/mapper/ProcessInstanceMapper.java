@@ -85,6 +85,7 @@ public interface ProcessInstanceMapper {
             @Result(property = "scheduleTime", column = "schedule_time", javaType = Timestamp.class, jdbcType = JdbcType.DATE),
             @Result(property = "commandStartTime", column = "command_start_time", javaType = Timestamp.class, jdbcType = JdbcType.DATE),
             @Result(property = "globalParams", column = "global_params", javaType = String.class, jdbcType = JdbcType.VARCHAR),
+            @Result(property = "userData", column = "user_data", javaType = String.class, jdbcType = JdbcType.VARCHAR),  //xsc,2020.5.17 for user data custom.
             @Result(property = "executorId", column = "executor_id", javaType = Integer.class, jdbcType = JdbcType.INTEGER),
             @Result(property = "processInstanceJson", column = "process_instance_json", javaType = String.class, jdbcType = JdbcType.VARCHAR),
             @Result(property = "isSubProcess", column = "is_sub_process", javaType = Flag.class, typeHandler = EnumOrdinalTypeHandler.class, jdbcType = JdbcType.TINYINT),
@@ -128,6 +129,7 @@ public interface ProcessInstanceMapper {
             @Result(property = "scheduleTime", column = "schedule_time", javaType = Timestamp.class, jdbcType = JdbcType.DATE),
             @Result(property = "commandStartTime", column = "command_start_time", javaType = Timestamp.class, jdbcType = JdbcType.DATE),
             @Result(property = "globalParams", column = "global_params", javaType = String.class, jdbcType = JdbcType.VARCHAR),
+            @Result(property = "userData", column = "user_data", javaType = String.class, jdbcType = JdbcType.VARCHAR),  //xsc,2020.5.17 for user data custom.
             @Result(property = "executorId", column = "executor_id", javaType = Integer.class, jdbcType = JdbcType.INTEGER),
             @Result(property = "processInstanceJson", column = "process_instance_json", javaType = String.class, jdbcType = JdbcType.VARCHAR),
             @Result(property = "isSubProcess", column = "is_sub_process", javaType = Flag.class, typeHandler = EnumOrdinalTypeHandler.class, jdbcType = JdbcType.TINYINT),

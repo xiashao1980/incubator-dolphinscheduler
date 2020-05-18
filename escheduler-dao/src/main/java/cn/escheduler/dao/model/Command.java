@@ -96,6 +96,11 @@ public class Command {
      */
     private int workerGroupId;
 
+    /**
+     * user data for custom instance init
+     */
+    private String userData;
+
 
     public Command(){
         this.taskDependType = TaskDependType.TASK_POST;
@@ -244,6 +249,13 @@ public class Command {
         this.workerGroupId = workerGroupId;
     }
 
+    public String getUserData(){
+        return this.userData;
+    }
+    public void setUserData(String data){
+        this.userData = data;
+    }
+
     @Override
     public String toString() {
         return "Command{" +
@@ -252,6 +264,7 @@ public class Command {
                 ", processDefinitionId=" + processDefinitionId +
                 ", executorId=" + executorId +
                 ", commandParam='" + commandParam + '\'' +
+                ", userData='" + userData + '\'' +
                 ", taskDependType=" + taskDependType +
                 ", failureStrategy=" + failureStrategy +
                 ", warningType=" + warningType +

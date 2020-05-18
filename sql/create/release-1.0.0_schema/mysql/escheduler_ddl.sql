@@ -151,6 +151,7 @@ CREATE TABLE `t_escheduler_process_instance` (
   `schedule_time` datetime DEFAULT NULL COMMENT '预期运行时间',
   `command_start_time` datetime DEFAULT NULL COMMENT '开始命令时间',
   `global_params` text COMMENT '全局参数（固化流程定义的参数）',
+  `user_data` text COMMENT '用户自定义数据, 启动实例时输入',
   `process_instance_json` longtext COMMENT '流程实例json(copy的流程定义的json)',
   `flag` tinyint(4) DEFAULT '1' COMMENT '是否可用，1 可用，0不可用',
   `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

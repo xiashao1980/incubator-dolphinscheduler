@@ -90,7 +90,7 @@ public class ExecutorService extends BaseService{
                                                    FailureStrategy failureStrategy, String startNodeList,
                                                    TaskDependType taskDependType, WarningType warningType, int warningGroupId,
                                                    String receivers, String receiversCc, RunMode runMode,
-                                                   Priority processInstancePriority, int workerGroupId, Integer timeout) throws ParseException {
+                                                   Priority processInstancePriority, int workerGroupId, Integer timeout, String userData) throws ParseException {
         Map<String, Object> result = new HashMap<>(5);
         // timeout is valid
         if (timeout <= 0 || timeout > MAX_TASK_TIMEOUT) {
@@ -120,9 +120,9 @@ public class ExecutorService extends BaseService{
         /**
          * create command
          */
-        int create = this.createCommand(commandType, processDefinitionId,
+        int create = this.createCommandWithUserData(commandType, processDefinitionId,
                 taskDependType, failureStrategy, startNodeList, cronTime, warningType, loginUser.getId(),
-                warningGroupId, runMode,processInstancePriority, workerGroupId);
+                warningGroupId, runMode,processInstancePriority, workerGroupId, userData);
         if(create > 0 ){
             /**
              * according to the process definition ID updateProcessInstance and CC recipient
@@ -477,6 +477,103 @@ public class ExecutorService extends BaseService{
         command.setWarningGroupId(warningGroupId);
         command.setProcessInstancePriority(processInstancePriority);
         command.setWorkerGroupId(workerGroupId);
+
+        Date start = null;
+        Date end = null;
+        if(StringUtils.isNotEmpty(schedule)){
+            String[] interval = schedule.split(",");
+            if(interval.length == 2){
+                start = DateUtils.getScheduleDate(interval[0]);
+                end = DateUtils.getScheduleDate(interval[1]);
+            }
+        }
+
+        if(commandType == CommandType.COMPLEMENT_DATA){
+            runMode = (runMode == null) ? RunMode.RUN_MODE_SERIAL : runMode;
+            if(runMode == RunMode.RUN_MODE_SERIAL){
+                cmdParam.put(CMDPARAM_COMPLEMENT_DATA_START_DATE, DateUtils.dateToString(start));
+                cmdParam.put(CMDPARAM_COMPLEMENT_DATA_END_DATE, DateUtils.dateToString(end));
+                command.setCommandParam(JSONUtils.toJson(cmdParam));
+                return processDao.createCommand(command);
+            }else if (runMode == RunMode.RUN_MODE_PARALLEL){
+                int runCunt = 0;
+                while(!start.after(end)){
+                    runCunt += 1;
+                    cmdParam.put(CMDPARAM_COMPLEMENT_DATA_START_DATE, DateUtils.dateToString(start));
+                    cmdParam.put(CMDPARAM_COMPLEMENT_DATA_END_DATE, DateUtils.dateToString(start));
+                    command.setCommandParam(JSONUtils.toJson(cmdParam));
+                    processDao.createCommand(command);
+                    start = DateUtils.getSomeDay(start, 1);
+                }
+                return runCunt;
+            }
+        }else{
+            command.setCommandParam(JSONUtils.toJson(cmdParam));
+            return processDao.createCommand(command);
+        }
+
+        return 0;
+    }
+
+    /**
+     * create command with user data(xsc,2020.5.17)
+     *
+     * @param commandType
+     * @param processDefineId
+     * @param nodeDep
+     * @param failureStrategy
+     * @param startNodeList
+     * @param schedule
+     * @param warningType
+     * @param excutorId
+     * @param warningGroupId
+     * @param runMode
+     * @param userData
+     * @return
+     * @throws ParseException
+     */
+    private int createCommandWithUserData(CommandType commandType, int processDefineId,
+                              TaskDependType nodeDep, FailureStrategy failureStrategy,
+                              String startNodeList, String schedule, WarningType warningType,
+                              int excutorId, int warningGroupId,
+                              RunMode runMode,Priority processInstancePriority, int workerGroupId, String userData) throws ParseException {
+
+        /**
+         * instantiate command schedule instance
+         */
+        Command command = new Command();
+
+        if(userData == null || userData.isEmpty()){
+            userData = "Not defined";
+        }
+
+        Map<String,String> cmdParam = new HashMap<>();
+        if(commandType == null){
+            command.setCommandType(CommandType.START_PROCESS);
+        }else{
+            command.setCommandType(commandType);
+        }
+        command.setProcessDefinitionId(processDefineId);
+        if(nodeDep != null){
+            command.setTaskDependType(nodeDep);
+        }
+        if(failureStrategy != null){
+            command.setFailureStrategy(failureStrategy);
+        }
+
+        if(StringUtils.isNotEmpty(startNodeList)){
+            cmdParam.put(CMDPARAM_START_NODE_NAMES, startNodeList);
+        }
+        if(warningType != null){
+            command.setWarningType(warningType);
+        }
+        command.setCommandParam(JSONUtils.toJson(cmdParam));
+        command.setExecutorId(excutorId);
+        command.setWarningGroupId(warningGroupId);
+        command.setProcessInstancePriority(processInstancePriority);
+        command.setWorkerGroupId(workerGroupId);
+
+        command.setUserData(userData); //xsc,2020.5.17
 
         Date start = null;
         Date end = null;
