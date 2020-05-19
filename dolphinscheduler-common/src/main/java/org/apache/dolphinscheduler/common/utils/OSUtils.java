@@ -143,13 +143,19 @@ public class OSUtils {
     BufferedReader bufferedReader = null;
 
     try {
-      bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream("/etc/passwd")));
-      String line;
+      String os = System.getProperty("os.name");
+      if(os.toLowerCase().startsWith("win")){
+        userList.add("windows_local");
+      }
+      else {
+        bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream("/etc/passwd")));
+        String line;
 
-      while ((line = bufferedReader.readLine()) != null) {
-        if (line.contains(":")) {
-          String[] userInfo = line.split(":");
-          userList.add(userInfo[0]);
+        while ((line = bufferedReader.readLine()) != null) {
+          if (line.contains(":")) {
+            String[] userInfo = line.split(":");
+            userList.add(userInfo[0]);
+          }
         }
       }
     } catch (Exception e) {

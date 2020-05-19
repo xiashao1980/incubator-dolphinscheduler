@@ -16,10 +16,14 @@
  */
 package org.apache.dolphinscheduler.server.worker.task;
 
+import com.sun.jna.Pointer;
+import com.sun.jna.platform.win32.Kernel32;
+import com.sun.jna.platform.win32.WinNT;
 import org.apache.dolphinscheduler.common.Constants;
 import org.apache.dolphinscheduler.common.enums.ExecutionStatus;
 import org.apache.dolphinscheduler.common.thread.ThreadUtils;
 import org.apache.dolphinscheduler.common.utils.HadoopUtils;
+import org.apache.dolphinscheduler.common.utils.OSUtils;
 import org.apache.dolphinscheduler.dao.ProcessDao;
 import org.apache.dolphinscheduler.dao.entity.TaskInstance;
 import org.apache.dolphinscheduler.server.utils.LoggerUtils;
@@ -207,7 +211,15 @@ public abstract class AbstractCommandExecutor {
         // merge error information to standard output stream
         processBuilder.redirectErrorStream(true);
         // setting up user to run commands
-        processBuilder.command("sudo", "-u", tenantCode, commandType(), commandFile);
+
+        if(OSUtils.isWindows()){
+            processBuilder.command(commandType(), commandFile);
+        }
+        else {
+            processBuilder.command("sudo", "-u", tenantCode, commandType(), commandFile);
+        }
+
+
 
         process = processBuilder.start();
 
@@ -501,6 +513,39 @@ public abstract class AbstractCommandExecutor {
         return remainTime;
     }
 
+    private long getProcessIdEx(Process p){
+        long result = -1;
+        try
+        {
+            //for windows
+            if (p.getClass().getName().equals("java.lang.Win32Process") ||
+                    p.getClass().getName().equals("java.lang.ProcessImpl"))
+            {
+                Field f = p.getClass().getDeclaredField("handle");
+                f.setAccessible(true);
+                long handl = f.getLong(p);
+                Kernel32 kernel = Kernel32.INSTANCE;
+                WinNT.HANDLE hand = new WinNT.HANDLE();
+                hand.setPointer(Pointer.createConstant(handl));
+                result = kernel.GetProcessId(hand);
+                f.setAccessible(false);
+            }
+            //for unix based operating systems
+            else if (p.getClass().getName().equals("java.lang.UNIXProcess"))
+            {
+                Field f = p.getClass().getDeclaredField(Constants.PID /*"pid"*/);
+                f.setAccessible(true);
+                result = f.getLong(p);
+                f.setAccessible(false);
+            }
+        }
+        catch(Exception ex)
+        {
+            result = -1;
+        }
+        return result;
+    }
+
     /**
      * get process id
      *
@@ -508,7 +553,13 @@ public abstract class AbstractCommandExecutor {
      * @return process id
      */
     private int getProcessId(Process process) {
+
+        return (int)getProcessIdEx(process);
+
+        /*
         int processId = 0;
+
+
 
         try {
             Field f = process.getClass().getDeclaredField(Constants.PID);
@@ -520,6 +571,8 @@ public abstract class AbstractCommandExecutor {
         }
 
         return processId;
+
+        */
     }
 
     /**

@@ -115,20 +115,30 @@ public class PythonTask extends AbstractTask {
   private String buildCommand() throws Exception {
     String rawPythonScript = pythonParameters.getRawScript().replaceAll("\\r\\n", "\n");
 
+
+    Map<String, String> params = taskProps.getDefinedParams();
+    params.put("_userData", taskProps.getUserData());
+
     /**
      *  combining local and global parameters
      */
     Map<String, Property> paramsMap = ParamUtils.convert(taskProps.getUserDefParamsMap(),
-            taskProps.getDefinedParams(),
+            //taskProps.getDefinedParams(),
+            params,  //xsc,2020.5.17, 添加_userData参数
             pythonParameters.getLocalParametersMap(),
             taskProps.getCmdTypeIfComplement(),
             taskProps.getScheduleTime());
+
     if (paramsMap != null){
       rawPythonScript = ParameterUtils.convertParameterPlaceholders(rawPythonScript, ParamUtils.convert(paramsMap));
     }
 
     logger.info("raw python script : {}", pythonParameters.getRawScript());
     logger.info("task dir : {}", taskDir);
+
+    logger.info("Final python script : {}", rawPythonScript);
+
+
 
     return rawPythonScript;
   }

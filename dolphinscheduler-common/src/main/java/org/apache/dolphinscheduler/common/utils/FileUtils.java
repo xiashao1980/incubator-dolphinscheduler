@@ -83,8 +83,26 @@ public class FileUtils {
      */
     public static String getProcessExecDir(int projectId, int processDefineId, int processInstanceId, int taskInstanceId) {
 
-        return String.format("%s/process/%s/%s/%s/%s", PropertyUtils.getString(PROCESS_EXEC_BASEPATH), Integer.toString(projectId),
-                Integer.toString(processDefineId), Integer.toString(processInstanceId),Integer.toString(taskInstanceId));
+
+        String os = System.getProperty("os.name");
+        if(os.toLowerCase().startsWith("win")){
+            //System.out.println(os + " can't gunzip");
+            String tempPath =System.getProperty("java.io.tmpdir");
+            System.out.println(tempPath);
+
+
+
+            String destDir = String.format("%s%s\\process\\%s\\%s\\%s\\%s", tempPath.substring(0, tempPath.length() - 1), PropertyUtils.getString(PROCESS_EXEC_BASEPATH), Integer.toString(projectId),
+                    Integer.toString(processDefineId), Integer.toString(processInstanceId), Integer.toString(taskInstanceId)).replace('/', '\\');
+
+            System.out.println(destDir);
+
+            return destDir;
+        }
+        else {
+            return String.format("%s/process/%s/%s/%s/%s", PropertyUtils.getString(PROCESS_EXEC_BASEPATH), Integer.toString(projectId),
+                    Integer.toString(processDefineId), Integer.toString(processInstanceId), Integer.toString(taskInstanceId));
+        }
     }
 
     /**
@@ -124,19 +142,23 @@ public class FileUtils {
         //create work dir
         org.apache.commons.io.FileUtils.forceMkdir(execLocalPathFile);
 
+        if(OSUtils.isWindows()){
+            //不用创建, windows直接用当前用户登录
+            return;
+        }
+        else{
+            //if not exists this user,then create
+            if (!OSUtils.getUserList().contains(userName)){
+                String userGroup = OSUtils.getGroup();
+                if (org.apache.commons.lang3.StringUtils.isNotEmpty(userGroup)){
+                    logger.info("create os user : {}",userName);
+                    String cmd = String.format("sudo useradd -g %s %s",userGroup,userName);
 
-        //if not exists this user,then create
-        if (!OSUtils.getUserList().contains(userName)){
-            String userGroup = OSUtils.getGroup();
-            if (org.apache.commons.lang3.StringUtils.isNotEmpty(userGroup)){
-                logger.info("create os user : {}",userName);
-                String cmd = String.format("sudo useradd -g %s %s",userGroup,userName);
-
-                logger.info("execute cmd : {}",cmd);
-                OSUtils.exeCmd(cmd);
+                    logger.info("execute cmd : {}",cmd);
+                    OSUtils.exeCmd(cmd);
+                }
             }
         }
-
     }
 
 

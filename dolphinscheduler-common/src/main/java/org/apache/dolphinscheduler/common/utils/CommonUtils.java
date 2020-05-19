@@ -16,6 +16,7 @@
  */
 package org.apache.dolphinscheduler.common.utils;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.dolphinscheduler.common.Constants;
 import org.apache.dolphinscheduler.common.enums.ResUploadType;
 import org.apache.commons.lang3.StringUtils;
@@ -42,7 +43,53 @@ public class  CommonUtils {
       envPath = System.getProperty("user.home") + File.separator + ".bash_profile";
     }
 
+    if(OSUtils.isWindows())
+    {
+      //如果是windows, 则使用jar包所在路径的上面一层的
+      String jarPath = CommonUtils.getCurrentJarPath();
+      String newPath = (jarPath + envPath).replace('/','\\');
+      return newPath;
+    }
+
     return envPath;
+  }
+
+  public static String getCurrentJarPath(){
+
+    String filePath = System.getProperty("java.class.path");
+    String pathSplit = System.getProperty("path.separator");//windows下是";",linux下是":"
+
+    String markClassName = "\\classes";
+
+    String[] filePathes = filePath.split(pathSplit);
+    for(int i=0;i<filePathes.length;i++){
+      String curPath = filePathes[i];
+
+      if(curPath.length() < markClassName.length())
+        continue;
+
+      String tail = curPath.substring(curPath.length() - markClassName.length());
+      if(tail.equals(markClassName)){
+        return curPath;
+      }
+
+    }
+
+    if(filePath.contains(pathSplit)){
+      filePath = filePath.substring(0,filePath.indexOf(pathSplit));
+    }else if (filePath.endsWith(".jar")) {//截取路径中的jar包名,可执行jar包运行的结果里包含".jar"
+
+      //此时的路径是"E:\workspace\Demorun\Demorun_fat.jar"，用"/"分割不行
+      //下面的语句输出是-1，应该改为lastIndexOf("\\")或者lastIndexOf(File.separator)
+//			System.out.println("getPath2:"+filePath.lastIndexOf("/"));
+      filePath = filePath.substring(0, filePath.lastIndexOf(File.separator) + 1);
+
+    }
+    return filePath;
+
+
+
+
   }
 
   /**
