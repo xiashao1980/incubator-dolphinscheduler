@@ -407,6 +407,7 @@ public class ProcessDao {
         processInstance.setMaxTryTimes(0);
         processInstance.setProcessDefinitionId(command.getProcessDefinitionId());
         processInstance.setCommandParam(command.getCommandParam());
+        processInstance.setUserData(command.getUserData());  //xsc,2020.5.17, add user data support.
         processInstance.setCommandType(command.getCommandType());
         processInstance.setIsSubProcess(Flag.NO);
         processInstance.setTaskDependType(command.getTaskDependType());
