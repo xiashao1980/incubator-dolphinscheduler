@@ -116,7 +116,8 @@ public class TaskScheduleThread implements Runnable {
                     taskInstance.getStartTime(),
                     getGlobalParamsMap(),
                     taskInstance.getDependency(),
-                    processInstance.getCmdTypeIfComplement());
+                    processInstance.getCmdTypeIfComplement(),
+                    processInstance.getUserData());
             // set task timeout
             setTaskTimeout(taskProps, taskNode);
 

@@ -111,6 +111,8 @@ public class TaskProps {
    */
   private CommandType cmdTypeIfComplement;
 
+  private String userData;
+
   /**
    * constructor
    */
@@ -144,7 +146,8 @@ public class TaskProps {
                    Date taskStartTime,
                    Map<String, String> definedParams,
                    String dependence,
-                   CommandType cmdTypeIfComplement){
+                   CommandType cmdTypeIfComplement,
+                   String userData){
     this.taskParams = taskParams;
     this.taskDir = taskDir;
     this.scheduleTime = scheduleTime;
@@ -158,6 +161,8 @@ public class TaskProps {
     this.definedParams = definedParams;
     this.dependence = dependence;
     this.cmdTypeIfComplement = cmdTypeIfComplement;
+
+    this.userData = userData;
 
   }
 
@@ -289,6 +294,11 @@ public class TaskProps {
 
   public void setCmdTypeIfComplement(CommandType cmdTypeIfComplement) {
     this.cmdTypeIfComplement = cmdTypeIfComplement;
+  }
+
+  public String getUserData()
+  {
+    return userData;
   }
 
   /**

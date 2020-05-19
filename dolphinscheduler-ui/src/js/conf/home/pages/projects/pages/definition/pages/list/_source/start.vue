@@ -121,6 +121,24 @@
         </div>
       </div>
     </div>
+    <div class="clearfix list">
+          <div class="text">
+            {{$t('User data')}}
+          </div>
+          <div class="cont">
+            <div style="padding-top: 6px;width: 688px;">
+               <x-input
+                              type="text"
+                              v-model="userData"
+                              :disabled="isDetails"
+                              :placeholder="$t('Please enter user data here(option)')"
+                              maxlength="4000"
+                              @on-blur=""
+                              autocomplete="off">
+                            </x-input>
+            </div>
+          </div>
+        </div>
     <template v-if="execType">
       <div class="clearfix list" style="margin:-6px 0 16px 0">
         <div class="text">
@@ -185,7 +203,8 @@
         receiversCc: [],
         runMode: 'RUN_MODE_SERIAL',
         processInstancePriority: 'MEDIUM',
-        workerGroupId: -1
+        workerGroupId: -1,
+        userData: '',
       }
     },
     props: {
@@ -215,7 +234,8 @@
           processInstancePriority: this.processInstancePriority,
           receivers: this.receivers.join(',') || '',
           receiversCc: this.receiversCc.join(',') || '',
-          workerGroupId: this.workerGroupId
+          workerGroupId: this.workerGroupId,
+          userData: this.userData,
         }
         // Executed from the specified node
         if (this.sourceType === 'contextmenu') {

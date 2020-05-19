@@ -361,6 +361,8 @@ export default {
   'Recipient': 'Recipient',
   'Cc': 'Cc',
   'Whether it is a complement process?': 'Whether it is a complement process?',
+  'User data': 'User data',
+  'Please enter user data here(option)': 'Please enter user data here(option)',
   'Mode of execution': 'Mode of execution',
   'Serial execution': 'Serial execution',
   'Parallel execution': 'Parallel execution',

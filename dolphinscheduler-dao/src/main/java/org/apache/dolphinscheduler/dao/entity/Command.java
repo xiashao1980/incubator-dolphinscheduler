@@ -117,6 +117,12 @@ public class Command {
     @TableField("worker_group_id")
     private int workerGroupId;
 
+    /**
+     * user data for custom instance init
+     */
+	@TableField("user_data")
+    private String userData;
+
 
     public Command() {
         this.taskDependType = TaskDependType.TASK_POST;
@@ -264,6 +270,12 @@ public class Command {
     public void setWorkerGroupId(int workerGroupId) {
         this.workerGroupId = workerGroupId;
     }
+	public String getUserData(){
+        return this.userData;
+    }
+    public void setUserData(String data){
+        this.userData = data;
+    }
 
     @Override
     public String toString() {
@@ -273,6 +285,7 @@ public class Command {
                 ", processDefinitionId=" + processDefinitionId +
                 ", executorId=" + executorId +
                 ", commandParam='" + commandParam + '\'' +
+                ", userData='" + userData + '\'' +
                 ", taskDependType=" + taskDependType +
                 ", failureStrategy=" + failureStrategy +
                 ", warningType=" + warningType +

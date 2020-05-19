@@ -141,6 +141,80 @@ public class ExecutorService extends BaseService{
         return result;
     }
 
+    /**
+     * execute process instance
+     *
+     * @param loginUser             login user
+     * @param projectName           project name
+     * @param processDefinitionId   process Definition Id
+     * @param cronTime              cron time
+     * @param commandType           command type
+     * @param failureStrategy       failuer strategy
+     * @param startNodeList         start nodelist
+     * @param taskDependType        node dependency type
+     * @param warningType           warning type
+     * @param warningGroupId         notify group id
+     * @param receivers             receivers
+     * @param receiversCc           receivers cc
+     * @param processInstancePriority process instance priority
+     * @param workerGroupId worker group id
+     * @param runMode run mode
+     * @param timeout               timeout
+     * @return execute process instance code
+     * @throws ParseException Parse Exception
+     */
+    public Map<String, Object> execProcessInstanceWithUserData(User loginUser, String projectName,
+                                                   int processDefinitionId, String cronTime, CommandType commandType,
+                                                   FailureStrategy failureStrategy, String startNodeList,
+                                                   TaskDependType taskDependType, WarningType warningType, int warningGroupId,
+                                                   String receivers, String receiversCc, RunMode runMode,
+                                                   Priority processInstancePriority, int workerGroupId, Integer timeout, String userData) throws ParseException {
+        Map<String, Object> result = new HashMap<>(5);
+        // timeout is valid
+        if (timeout <= 0 || timeout > MAX_TASK_TIMEOUT) {
+            putMsg(result,Status.TASK_TIMEOUT_PARAMS_ERROR);
+            return result;
+        }
+        Project project = projectMapper.queryByName(projectName);
+        Map<String, Object> checkResultAndAuth = checkResultAndAuth(loginUser, projectName, project);
+        if (checkResultAndAuth != null){
+            return checkResultAndAuth;
+        }
+
+        // check process define release state
+        ProcessDefinition processDefinition = processDefinitionMapper.selectById(processDefinitionId);
+        result = checkProcessDefinitionValid(processDefinition, processDefinitionId);
+        if(result.get(Constants.STATUS) != Status.SUCCESS){
+            return result;
+        }
+
+        if (!checkTenantSuitable(processDefinition)){
+            logger.error("there is not any vaild tenant for the process definition: id:{},name:{}, ",
+                    processDefinition.getId(), processDefinition.getName());
+            putMsg(result, Status.TENANT_NOT_SUITABLE);
+            return result;
+        }
+
+        /**
+         * create command
+         */
+        int create = this.createCommandWithUserData(commandType, processDefinitionId,
+                taskDependType, failureStrategy, startNodeList, cronTime, warningType, loginUser.getId(),
+                warningGroupId, runMode,processInstancePriority, workerGroupId, userData);
+        if(create > 0 ){
+            /**
+             * according to the process definition ID updateProcessInstance and CC recipient
+             */
+            processDefinition.setReceivers(receivers);
+            processDefinition.setReceiversCc(receiversCc);
+            processDefinitionMapper.updateById(processDefinition);
+            putMsg(result, Status.SUCCESS);
+        } else {
+            putMsg(result, Status.START_PROCESS_INSTANCE_ERROR);
+        }
+        return result;
+    }
+
 
 
     /**
@@ -523,6 +597,99 @@ public class ExecutorService extends BaseService{
 
         return 0;
     }
+
+    /**
+     * create command with user data
+     *
+     * @param commandType
+     * @param processDefineId
+     * @param nodeDep
+     * @param failureStrategy
+     * @param startNodeList
+     * @param schedule
+     * @param warningType
+     * @param excutorId
+     * @param warningGroupId
+     * @param runMode
+     * @return
+     * @throws ParseException
+     */
+    private int createCommandWithUserData(CommandType commandType, int processDefineId,
+                              TaskDependType nodeDep, FailureStrategy failureStrategy,
+                              String startNodeList, String schedule, WarningType warningType,
+                              int excutorId, int warningGroupId,
+                              RunMode runMode,Priority processInstancePriority, int workerGroupId, String userData) throws ParseException {
+
+        /**
+         * instantiate command schedule instance
+         */
+        Command command = new Command();
+
+        Map<String,String> cmdParam = new HashMap<>();
+        if(commandType == null){
+            command.setCommandType(CommandType.START_PROCESS);
+        }else{
+            command.setCommandType(commandType);
+        }
+        command.setProcessDefinitionId(processDefineId);
+        if(nodeDep != null){
+            command.setTaskDependType(nodeDep);
+        }
+        if(failureStrategy != null){
+            command.setFailureStrategy(failureStrategy);
+        }
+
+        if(StringUtils.isNotEmpty(startNodeList)){
+            cmdParam.put(CMDPARAM_START_NODE_NAMES, startNodeList);
+        }
+        if(warningType != null){
+            command.setWarningType(warningType);
+        }
+        command.setCommandParam(JSONUtils.toJson(cmdParam));
+        command.setExecutorId(excutorId);
+        command.setWarningGroupId(warningGroupId);
+        command.setProcessInstancePriority(processInstancePriority);
+        command.setWorkerGroupId(workerGroupId);
+
+        command.setUserData(userData);  //xsc,2020.5.17
+
+        Date start = null;
+        Date end = null;
+        if(StringUtils.isNotEmpty(schedule)){
+            String[] interval = schedule.split(",");
+            if(interval.length == 2){
+                start = DateUtils.getScheduleDate(interval[0]);
+                end = DateUtils.getScheduleDate(interval[1]);
+            }
+        }
+
+        if(commandType == CommandType.COMPLEMENT_DATA){
+            runMode = (runMode == null) ? RunMode.RUN_MODE_SERIAL : runMode;
+            if(runMode == RunMode.RUN_MODE_SERIAL){
+                cmdParam.put(CMDPARAM_COMPLEMENT_DATA_START_DATE, DateUtils.dateToString(start));
+                cmdParam.put(CMDPARAM_COMPLEMENT_DATA_END_DATE, DateUtils.dateToString(end));
+                command.setCommandParam(JSONUtils.toJson(cmdParam));
+                return processDao.createCommand(command);
+            }else if (runMode == RunMode.RUN_MODE_PARALLEL){
+                int runCunt = 0;
+                while(!start.after(end)){
+                    runCunt += 1;
+                    cmdParam.put(CMDPARAM_COMPLEMENT_DATA_START_DATE, DateUtils.dateToString(start));
+                    cmdParam.put(CMDPARAM_COMPLEMENT_DATA_END_DATE, DateUtils.dateToString(start));
+                    command.setCommandParam(JSONUtils.toJson(cmdParam));
+                    processDao.createCommand(command);
+                    start = DateUtils.getSomeDay(start, 1);
+                }
+                return runCunt;
+            }
+        }else{
+            command.setCommandParam(JSONUtils.toJson(cmdParam));
+            return processDao.createCommand(command);
+        }
+
+        return 0;
+    }
+
 
     /**
      * check result and auth

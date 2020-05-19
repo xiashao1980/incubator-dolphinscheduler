@@ -356,6 +356,8 @@ export default {
   'Recipient': '收件人',
   'Cc': '抄送人',
   'Whether it is a complement process?': '是否补数',
+  'User data': '用户数据',
+  'Please enter user data here(option)': '请输入自定义用户数据(可选项)',
   'Mode of execution': '执行方式',
   'Serial execution': '串行执行',
   'Parallel execution': '并行执行',

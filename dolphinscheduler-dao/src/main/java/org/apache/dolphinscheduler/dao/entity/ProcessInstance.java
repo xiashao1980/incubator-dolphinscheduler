@@ -130,6 +130,8 @@ public class ProcessInstance {
      */
     private String globalParams;
 
+    private String userData;
+
     /**
      * process instance json
      */
@@ -405,6 +407,13 @@ public class ProcessInstance {
         this.globalParams = globalParams;
     }
 
+    public String getUserData(){
+        return this.userData;
+    }
+    public void setUserData(String userData){
+        this.userData = userData;
+    }
+
     public String getProcessInstanceJson() {
         return processInstanceJson;
     }
@@ -600,6 +609,7 @@ public class ProcessInstance {
                 ", scheduleTime=" + scheduleTime +
                 ", commandStartTime=" + commandStartTime +
                 ", globalParams='" + globalParams + '\'' +
+				", userData='" + userData + '\'' +
                 ", processInstanceJson='" + processInstanceJson + '\'' +
                 ", executorId=" + executorId +
                 ", tenantCode='" + tenantCode + '\'' +
