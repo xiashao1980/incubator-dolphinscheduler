@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one or more
+  ~ contributor license agreements.  See the NOTICE file distributed with
+  ~ this work for additional information regarding copyright ownership.
+  ~ The ASF licenses this file to You under the Apache License, Version 2.0
+  ~ (the "License"); you may not use this file except in compliance with
+  ~ the License.  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.apache.dolphinscheduler.dao.mapper.AsyncCallbackMsgMapper">
+    <select id="getAsyncCallbackMsgByKey" resultType="org.apache.dolphinscheduler.dao.entity.AsyncCallbackMsg">
+        select msg.*
+        from t_ds_async_callback_msg msg
+        where msg.process_instance_id = #{process_inst_id} and msg.callback_tag = #{tag} and msg.is_valid = 1 order by msg.callback_time desc limit 0, 1
+    </select>
+    <select id="getReadyAsyncCallbackMessageCount" resultType="java.lang.Integer">
+        select count(*)
+        from t_ds_async_callback_msg msg
+        where msg.is_valid = 1 and msg.callback_time is not null and msg.confirm_time is null
+    </select>
+    <select id="getReadyAsyncCallbackMessages" resultType="org.apache.dolphinscheduler.dao.entity.AsyncCallbackMsg">
+        select msg.*
+        from t_ds_async_callback_msg msg
+        where msg.is_valid = 1 and msg.callback_time is not null and msg.confirm_time is null order by msg.callback_time limit 0, #{top_limit}
+    </select>
+    
+    <update id="updateValidState">
+        update t_ds_async_callback_msg
+        set is_valid=#{valid}
+        where process_instance_id = #{process_inst_id} and callback_tag = #{tag}
+    </update>
+
+    <update id="updateConfirmedState">
+        update t_ds_async_callback_msg
+        set confirm_time = now()
+        where process_instance_id = #{process_inst_id} and callback_tag = #{tag}
+    </update>
+
+
+	
+	<update id="updateCallbackResult">
+        update t_ds_async_callback_msg
+        set result_code= #{code},
+		result_msg = #{msg},
+		result_overload = #{overload},
+		callback_time = now(),
+		confirm_time = null
+        where process_instance_id = #{process_inst_id} and callback_tag = #{tag}
+    </update>
+	<insert id="saveEmptyAsyncCallbackMsg">
+		insert into t_ds_async_callback_msg(process_instance_id, callback_tag, task_query_str,  is_valid, create_time) values(#{process_inst_id}, #{tag}, #{task_query_str}, 1, now())
+	</insert>
+	
+</mapper>
