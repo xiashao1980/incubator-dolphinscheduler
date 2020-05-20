@@ -116,8 +116,12 @@ public class PythonTask extends AbstractTask {
     String rawPythonScript = pythonParameters.getRawScript().replaceAll("\\r\\n", "\n");
 
 
+    //xsc,2020.5.19, add userData and taskAppId, taskInstId global param
     Map<String, String> params = taskProps.getDefinedParams();
-    params.put("_userData", taskProps.getUserData());
+    params.put("userData", "\"\"\"" + taskProps.getUserData() + "\"\"\"");
+    params.put("taskAppId", "\"" + taskProps.getTaskAppId() + "\"");
+    params.put("taskInstId", String.valueOf(taskProps.getTaskInstId()));
+
 
     /**
      *  combining local and global parameters
