@@ -39,6 +39,7 @@ import org.quartz.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,6 +69,9 @@ public class ProcessDao {
 
     @Autowired
     private ProcessInstanceMapper processInstanceMapper;
+
+    @Autowired
+    private AsyncCallbackMsgMapper asyncCallbackMsgMapper;  //xsc,2020.5.19
 
     @Autowired
     private DataSourceMapper dataSourceMapper;
@@ -1672,6 +1676,7 @@ public class ProcessDao {
                 stateArray);
     }
 
+
     /**
      * query user queue by process instance id
      * @param processInstanceId processInstanceId
@@ -1754,6 +1759,36 @@ public class ProcessDao {
         }
         return projectIdList;
     }
+
+    public  AsyncCallbackMsg getAsyncCallbackMsgByKey(int process_inst_id, String callback_tag){
+        return asyncCallbackMsgMapper.getAsyncCallbackMsgByKey(process_inst_id, callback_tag);
+    }
+
+    public void updateAsyncCallbackMsgValidStatus(int process_inst_id, String callback_tag, Boolean valid){
+        asyncCallbackMsgMapper.updateValidState(process_inst_id, callback_tag, valid);
+    }
+
+    public void saveAsyncCallbackResult(int process_inst_id, String tag,  String code, String msg, String overload){
+        asyncCallbackMsgMapper.saveCallbackResult(process_inst_id, tag, code, msg, overload);
+    }
+
+    public void saveEmptyAsyncCallbackMsg(int process_inst_id, String tag, String query_str){
+        if(asyncCallbackMsgMapper.getAsyncCallbackMsgByKey(process_inst_id, tag) == null)
+            asyncCallbackMsgMapper.saveEmptyAsyncCallbackMsg(process_inst_id, tag, query_str);
+    }
+
+    public List<AsyncCallbackMsg> getReadyAsyncCallbackMessages(int limit){
+        return asyncCallbackMsgMapper.getReadyAsyncCallbackMessages(limit);
+    }
+
+    public void updateAsyncCallbackMsgConfirmedState(int process_inst_id, String tag){
+        asyncCallbackMsgMapper.updateConfirmedState(process_inst_id, tag);
+    }
+
+    public int getReadyAsyncCallbackMessageCount(){
+        return asyncCallbackMsgMapper.getReadyAsyncCallbackMessageCount();
+    }
+
 
 
 }

@@ -16,15 +16,20 @@
  */
 package org.apache.dolphinscheduler.server.worker.runner;
 
+import com.alibaba.fastjson.JSONObject;
 import org.apache.dolphinscheduler.common.Constants;
+import org.apache.dolphinscheduler.common.model.TaskNode;
+import org.apache.dolphinscheduler.common.process.Property;
 import org.apache.dolphinscheduler.common.queue.ITaskQueue;
 import org.apache.dolphinscheduler.common.thread.Stopper;
 import org.apache.dolphinscheduler.common.thread.ThreadUtils;
 import org.apache.dolphinscheduler.common.utils.CollectionUtils;
 import org.apache.dolphinscheduler.common.utils.FileUtils;
+import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.common.utils.OSUtils;
 import org.apache.dolphinscheduler.common.zk.AbstractZKClient;
 import org.apache.dolphinscheduler.dao.ProcessDao;
+import org.apache.dolphinscheduler.dao.entity.AsyncCallbackMsg;
 import org.apache.dolphinscheduler.dao.entity.TaskInstance;
 import org.apache.dolphinscheduler.dao.entity.Tenant;
 import org.apache.dolphinscheduler.dao.entity.WorkerGroup;
@@ -34,10 +39,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -155,13 +159,40 @@ public class FetchTaskThread implements Runnable{
 
                 //whether have tasks, if no tasks , no need lock  //get all tasks
                 List<String> tasksQueueList = taskQueue.getAllTasks(Constants.DOLPHINSCHEDULER_TASKS_QUEUE);
-                if (CollectionUtils.isEmpty(tasksQueueList)){
+                if (CollectionUtils.isEmpty(tasksQueueList) && processDao.getReadyAsyncCallbackMessageCount() == 0){  //如果没有待处理的任务，或者没有confirm的回调消息的话, 5秒后再探...
+                    Thread.sleep(5000);
                     continue;
                 }
+
                 // creating distributed locks, lock path /dolphinscheduler/lock/worker
                 mutex = zkWorkerClient.acquireZkLock(zkWorkerClient.getZkClient(),
                         zkWorkerClient.getWorkerLockPath());
+                //锁定后, 独占处理未confirm的消息, 每次最多处理10条
+                try {
 
+                    List<AsyncCallbackMsg> waitingMessages = processDao.getReadyAsyncCallbackMessages(10);
+                    for(AsyncCallbackMsg item : waitingMessages){
+                        if(item == null)
+                            continue;
+
+                        //修改Confirm时间，表示该节点已经处理了
+                        processDao.updateAsyncCallbackMsgConfirmedState(item.getProcessInstanceId(), item.getCallbackTag());
+
+                        //尝试将恢复的节点加入处理队列, 如果已存在则不加，如果出现异常，可能需要回退上一步的操作.
+                        try {
+                            if (!taskQueue.checkTaskExists(Constants.DOLPHINSCHEDULER_TASKS_QUEUE, item.getTaskQueryStr()))
+                                taskQueue.add(Constants.DOLPHINSCHEDULER_TASKS_QUEUE, item.getTaskQueryStr());
+                        } catch (Exception ex) {
+                            //是否回退Confirm状态???
+                        }
+                    }
+                }
+                catch (Exception ex){
+
+                }
+                finally {
+
+                }
 
                 // task instance id str
                 List<String> taskQueueStrArr = taskQueue.poll(Constants.DOLPHINSCHEDULER_TASKS_QUEUE, taskNum);
@@ -197,6 +228,7 @@ public class FetchTaskThread implements Runnable{
                     if (verifyTenantIsNull(tenant)) {
                         logger.warn("remove task queue : {} due to tenant is null", taskQueueStr);
                         removeNodeFromTaskQueue(taskQueueStr);
+
                         continue;
                     }
 
@@ -222,6 +254,16 @@ public class FetchTaskThread implements Runnable{
                             new Date(),
                             execLocalPath);
 
+                    //判断当点是否是一个call back节点
+                    StringBuilder sbTag = new StringBuilder();
+                    if(!isTaskInstanceReady(taskInstance, sbTag))
+                    {
+                        logger.info("Waiting callback ...");
+                        processDao.saveEmptyAsyncCallbackMsg(taskInstance.getProcessInstanceId(), sbTag.toString(), taskQueueStr);
+                        removeNodeFromTaskQueue(taskQueueStr);
+                        continue;
+                    }
+
                     // check and create Linux users
                     FileUtils.createWorkDirAndUserIfAbsent(execLocalPath,
                             tenant.getTenantCode(), logger);
@@ -240,6 +282,54 @@ public class FetchTaskThread implements Runnable{
                 AbstractZKClient.releaseMutex(mutex);
             }
         }
+    }
+
+    private Boolean isTaskInstanceReady(TaskInstance taskInstance, StringBuilder sbCallbackTag){
+
+        //只判断PYHON节点
+        if(!taskInstance.getTaskType().equals("PYTHON")){
+            return true;
+        }
+
+        String taskJson = taskInstance.getTaskJson();
+        if(taskJson.contains("callback_tag")){
+            TaskNode taskNode = JSONObject.parseObject(taskInstance.getTaskJson(), TaskNode.class);
+
+            String parameter = taskNode.getParams();
+            Map<String, String> map = JSONUtils.toMap(parameter);
+
+            Collection<Property> userDefParamsList = JSONObject.parseArray(map.get("localParams"), Property.class);
+            for(Property item: userDefParamsList){
+                if(item.getProp().equals("callback_tag")){
+
+                    String callback_tag = item.getValue();
+                    int taskInstId = taskInstance.getProcessInstanceId();
+
+                    logger.info("Current task instance Id: {}, Current params: {}, " ,taskInstId, parameter);
+
+                    sbCallbackTag.append(callback_tag);
+
+                    //去系统中检查是否已经有callback
+                    AsyncCallbackMsg msg = this.processDao.getAsyncCallbackMsgByKey(taskInstId, callback_tag);
+                    if(msg != null && msg.isReadyForProcessing()){
+
+                        logger.warn("Current callback is ready! process_instance_id:{}, callback_tag:{}", msg.getProcessInstanceId(), msg.getCallbackTag());
+                        return true;
+                    }
+
+                    logger.warn("Current callback is not ready! process_instance_id:{}, callback_tag:{}", taskInstance.getProcessInstanceId(), callback_tag);
+                    return false;
+                }
+
+            }
+
+
+
+
+        }
+
+        return true;
+
     }
 
     /**

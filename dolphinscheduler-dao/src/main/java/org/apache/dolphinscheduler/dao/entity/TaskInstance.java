@@ -35,7 +35,7 @@ import java.util.Date;
  */
 @Data
 @TableName("t_ds_task_instance")
-public class TaskInstance {
+public class  TaskInstance {
 
     /**
      * id
