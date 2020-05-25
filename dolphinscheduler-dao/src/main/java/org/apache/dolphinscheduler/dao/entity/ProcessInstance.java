@@ -132,6 +132,10 @@ public class ProcessInstance {
 
     private String userData;
 
+
+
+    private String subTitle;
+
     /**
      * process instance json
      */
@@ -414,6 +418,14 @@ public class ProcessInstance {
         this.userData = userData;
     }
 
+    public String getSubTitle() {
+        return subTitle;
+    }
+
+    public void setSubTitle(String subTitle) {
+        this.subTitle = subTitle;
+    }
+
     public String getProcessInstanceJson() {
         return processInstanceJson;
     }
@@ -610,6 +622,7 @@ public class ProcessInstance {
                 ", commandStartTime=" + commandStartTime +
                 ", globalParams='" + globalParams + '\'' +
 				", userData='" + userData + '\'' +
+                ", subTitle='" + subTitle + '\'' +
                 ", processInstanceJson='" + processInstanceJson + '\'' +
                 ", executorId=" + executorId +
                 ", tenantCode='" + tenantCode + '\'' +

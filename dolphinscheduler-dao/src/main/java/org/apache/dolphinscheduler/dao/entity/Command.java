@@ -124,6 +124,14 @@ public class Command {
     private String userData;
 
 
+
+    /**
+     * A subtitle of each instance
+     */
+	@TableField("sub_title")
+	private String subTitle;
+
+
     public Command() {
         this.taskDependType = TaskDependType.TASK_POST;
         this.failureStrategy = FailureStrategy.CONTINUE;
@@ -277,6 +285,14 @@ public class Command {
         this.userData = data;
     }
 
+    public String getSubTitle() {
+        return subTitle;
+    }
+
+    public void setSubTitle(String subTitle) {
+        this.subTitle = subTitle;
+    }
+
     @Override
     public String toString() {
         return "Command{" +
@@ -285,6 +301,7 @@ public class Command {
                 ", processDefinitionId=" + processDefinitionId +
                 ", executorId=" + executorId +
                 ", commandParam='" + commandParam + '\'' +
+                ", subTitle='" + subTitle + '\'' +
                 ", userData='" + userData + '\'' +
                 ", taskDependType=" + taskDependType +
                 ", failureStrategy=" + failureStrategy +

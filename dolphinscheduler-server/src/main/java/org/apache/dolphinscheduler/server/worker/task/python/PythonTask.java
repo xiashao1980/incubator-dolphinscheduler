@@ -118,8 +118,8 @@ public class PythonTask extends AbstractTask {
 
     //xsc,2020.5.19, add userData and taskAppId, taskInstId global param
     Map<String, String> params = taskProps.getDefinedParams();
-    params.put("userData", "\"\"\"" + taskProps.getUserData() + "\"\"\"");
-    params.put("taskAppId", "\"" + taskProps.getTaskAppId() + "\"");
+    params.put("userData", taskProps.getUserData());
+    params.put("taskAppId", taskProps.getTaskAppId());
     params.put("taskInstId", String.valueOf(taskProps.getTaskInstId()));
 
 

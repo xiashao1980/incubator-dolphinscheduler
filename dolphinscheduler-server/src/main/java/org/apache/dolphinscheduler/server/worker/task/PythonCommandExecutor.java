@@ -95,7 +95,8 @@ public class PythonCommandExecutor extends AbstractCommandExecutor {
             logger.info("generate command file:{}", commandFile);
 
             StringBuilder sb = new StringBuilder();
-            sb.append("#-*- encoding=utf8 -*-\n");
+            ////sb.append("#-*- encoding=utf8 -*-\n");
+            sb.append("# -*- coding: UTF-8 -*-\n");  //xsc,2020.5.25
 
             sb.append("\n\n");
             sb.append(execCommand);

@@ -843,6 +843,7 @@ public final class Constants {
     public static final String SUBTRACT_STRING = "-";
     public static final String GLOBAL_PARAMS = "globalParams";
     public static final String USER_DATA = "userData";  //xsc,2020.5.17
+    public static final String SUB_TITLE = "subTitle";
     public static final String LOCAL_PARAMS = "localParams";
     public static final String PROCESS_INSTANCE_STATE = "processInstanceState";
     public static final String TASK_LIST = "taskList";

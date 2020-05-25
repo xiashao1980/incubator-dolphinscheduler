@@ -18,14 +18,15 @@ public interface AsyncCallbackMsgMapper extends BaseMapper<AsyncCallbackMsg> {
 
     /**
      * Get recently callback message items
-     * @return
+     * @param top_limit the limit
+     * @return The list of ready task(but not confirmed)
      */
     List<AsyncCallbackMsg> getReadyAsyncCallbackMessages(@Param("top_limit") int top_limit);
 
-    /**
+    /**F
      * Update confirm time field of Async callback message
-     * @param process_inst_id
-     * @param tag
+     * @param process_inst_id process instance id
+     * @param tag the callback tag
      */
     void updateConfirmedState(@Param("process_inst_id") int process_inst_id, @Param("tag") String tag);
 
@@ -34,7 +35,6 @@ public interface AsyncCallbackMsgMapper extends BaseMapper<AsyncCallbackMsg> {
      * @param process_inst_id processId instance id
      * @param tag  callback tag
      * @param valid  true or false for valid status
-     * @return process instance
      */
     void updateValidState(@Param("process_inst_id") int process_inst_id, @Param("tag") String tag, @Param("valid") Boolean valid);
 
@@ -45,7 +45,6 @@ public interface AsyncCallbackMsgMapper extends BaseMapper<AsyncCallbackMsg> {
      * @param code callback result code, 200 for successfully,
      * @param msg  callback result message
      * @param overload  callback overload information, just like a json or other data
-     * @return process instance
      */
     void saveCallbackResult(@Param("process_inst_id") int process_inst_id, @Param("tag") String tag, @Param("code") String code, @Param("msg") String msg, @Param("overload") String overload);
 
@@ -58,7 +57,7 @@ public interface AsyncCallbackMsgMapper extends BaseMapper<AsyncCallbackMsg> {
 
     /**
      * 查询是否有已回调，但未处理的异步消息(callback_time不为空，表示已经有回调, confirm_time为空，表示未把任务加回队列)
-     * @return
+     * @return a count of ready task
      */
     int getReadyAsyncCallbackMessageCount();
 

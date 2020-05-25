@@ -21,6 +21,24 @@
     </div>
     <div class="clearfix list">
       <div class="text">
+        {{$t('Subtitle')}}
+      </div>
+      <div class="cont">
+        <div style="padding-top: 6px;width: 688px;">
+           <x-input
+              type="text"
+              v-model="subTitle"
+              :disabled="isDetails"
+              :placeholder="$t('Please enter subtitle here(option)')"
+              maxlength="128"
+              @on-blur=""
+              autocomplete="off">
+           </x-input>
+        </div>
+      </div>
+    </div>
+    <div class="clearfix list">
+      <div class="text">
         {{$t('Failure Strategy')}}
       </div>
       <div class="cont">
@@ -30,6 +48,7 @@
         </x-radio-group>
       </div>
     </div>
+
     <div class="clearfix list" v-if="sourceType === 'contextmenu'" style="margin-top: -8px;">
       <div class="text">
         {{$t('Node execution')}}
@@ -122,23 +141,23 @@
       </div>
     </div>
     <div class="clearfix list">
-          <div class="text">
-            {{$t('User data')}}
-          </div>
-          <div class="cont">
-            <div style="padding-top: 6px;width: 688px;">
-               <x-input
-                              type="text"
-                              v-model="userData"
-                              :disabled="isDetails"
-                              :placeholder="$t('Please enter user data here(option)')"
-                              maxlength="4000"
-                              @on-blur=""
-                              autocomplete="off">
-                            </x-input>
-            </div>
-          </div>
+      <div class="text">
+        {{$t('User data')}}
+      </div>
+      <div class="cont">
+        <div style="padding-top: 6px;width: 688px;">
+           <x-input
+              type="text"
+              v-model="userData"
+              :disabled="isDetails"
+              :placeholder="$t('Please enter user data here(option)')"
+              maxlength="4000"
+              @on-blur=""
+              autocomplete="off">
+           </x-input>
         </div>
+      </div>
+    </div>
     <template v-if="execType">
       <div class="clearfix list" style="margin:-6px 0 16px 0">
         <div class="text">
@@ -236,6 +255,7 @@
           receiversCc: this.receiversCc.join(',') || '',
           workerGroupId: this.workerGroupId,
           userData: this.userData,
+          subTitle: this.subTitle
         }
         // Executed from the specified node
         if (this.sourceType === 'contextmenu') {
