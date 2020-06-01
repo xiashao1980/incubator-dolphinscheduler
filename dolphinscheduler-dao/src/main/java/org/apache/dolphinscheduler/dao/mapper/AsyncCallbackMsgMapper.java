@@ -46,7 +46,7 @@ public interface AsyncCallbackMsgMapper extends BaseMapper<AsyncCallbackMsg> {
      * @param msg  callback result message
      * @param overload  callback overload information, just like a json or other data
      */
-    void saveCallbackResult(@Param("process_inst_id") int process_inst_id, @Param("tag") String tag, @Param("code") String code, @Param("msg") String msg, @Param("overload") String overload);
+    void updateCallbackResult(@Param("process_inst_id") int process_inst_id, @Param("tag") String tag, @Param("code") String code, @Param("msg") String msg, @Param("overload") String overload);
 
     /**
      * create a empty record for this callback

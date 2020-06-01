@@ -47,7 +47,6 @@
     </update>
 
 
-	
 	<update id="updateCallbackResult">
         update t_ds_async_callback_msg
         set result_code= #{code},

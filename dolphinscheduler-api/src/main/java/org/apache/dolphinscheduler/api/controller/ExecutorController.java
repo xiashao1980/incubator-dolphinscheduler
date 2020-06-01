@@ -138,6 +138,48 @@ public class ExecutorController extends BaseController {
         }
     }
 
+    /**
+     * save async callback result and resume the holding process
+     *
+     * @param loginUser login user
+     * @param projectName project name
+     * @param processInstanceId process instance id
+     * @param callbackTag callback tag
+     * @param resultCode result code
+     * @param resultOverload result overload data
+     * @param resultMsg result message
+     * @return callback result code
+     */
+    @ApiOperation(value = "callback", notes= "CALLBACK_ACTION_TO_PROCESS_INSTANCE_NODE")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "processInstanceId", value = "PROCESS_INSTANCE_ID", required = true, dataType = "Int", example = "100"),
+            @ApiImplicitParam(name = "callbackTag", value = "CALLBACK_TAG", required = true, dataType = "String"),
+            @ApiImplicitParam(name = "resultCode", value = "CALLBACK_RESULT_CODE", required = true, dataType = "String"),
+            @ApiImplicitParam(name = "resultOverload", value = "CALLBACK_OVERLOAD", required = true, dataType = "String"),
+            @ApiImplicitParam(name = "resultMsg", value = "CALLBACK_RESULT_MSG", required = false, dataType = "String")
+    })
+    @PostMapping(value = "/callback")
+    @ResponseStatus(HttpStatus.OK)
+    public Result callback(@ApiIgnore @RequestAttribute(value = Constants.SESSION_USER) User loginUser,
+                          @ApiParam(name = "projectName", value = "PROJECT_NAME", required = true) @PathVariable String projectName,
+                          @RequestParam("processInstanceId") Integer processInstanceId,
+                          @RequestParam("callbackTag") String callbackTag,
+                          @RequestParam("resultCode") String resultCode,
+                          @RequestParam("resultOverload") String resultOverload,
+                          @RequestParam("resultMsg") String resultMsg
+    ) {
+        try {
+            logger.info("execute command, login user: {}, project:{}, process instance id:{}, callback tag:{}",
+                    loginUser.getUserName(), projectName, processInstanceId, callbackTag);
+            Map<String, Object> result = execService.callback(loginUser, projectName, processInstanceId, callbackTag, resultCode, resultOverload, resultMsg);
+            return returnDataList(result);
+        } catch (Exception e) {
+            logger.error(Status.CALLBACK_PROCESS_INSTANCE_ERROR.getMsg(),e);
+            return error(Status.CALLBACK_PROCESS_INSTANCE_ERROR.getCode(), Status.CALLBACK_PROCESS_INSTANCE_ERROR.getMsg());
+        }
+    }
+
+
 
     /**
      * do action to process instance：pause, stop, repeat, recover from pause, recover from stop

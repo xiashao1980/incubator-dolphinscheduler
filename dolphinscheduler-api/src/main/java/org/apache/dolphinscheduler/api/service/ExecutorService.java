@@ -238,7 +238,33 @@ public class ExecutorService extends BaseService{
         return result;
     }
 
+    /**
+     * update callback result for async workflow support
+     * @param loginUser login user
+     * @param projectName project name
+     * @param processInstanceId process instance id
+     * @param callbackTag callback tag
+     * @param resultCode result code
+     * @param resultOverload result overload
+     * @param resultMsg result message
+     * @return update result code
+     */
+    public Map<String,Object> callback(User loginUser, String projectName, Integer processInstanceId, String callbackTag, String resultCode, String resultOverload, String resultMsg){
 
+        Map<String, Object> result = new HashMap<>();
+        processDao.updateAsyncCallbackResult(processInstanceId, callbackTag, resultCode, resultOverload, resultMsg);
+        if(!resultCode.equals("200"))
+        {
+            execute(loginUser, projectName, processInstanceId, ExecuteType.PAUSE);
+        }
+        else
+        {
+            execute(loginUser, projectName, processInstanceId, ExecuteType.RECOVER_SUSPENDED_PROCESS);
+        }
+        putMsg(result, Status.SUCCESS);
+        return result;
+
+    }
 
     /**
      * do action to process instance：pause, stop, repeat, recover from pause, recover from stop

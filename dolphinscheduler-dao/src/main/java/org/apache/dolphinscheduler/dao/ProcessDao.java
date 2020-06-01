@@ -1769,8 +1769,8 @@ public class ProcessDao {
         asyncCallbackMsgMapper.updateValidState(process_inst_id, callback_tag, valid);
     }
 
-    public void saveAsyncCallbackResult(int process_inst_id, String tag,  String code, String msg, String overload){
-        asyncCallbackMsgMapper.saveCallbackResult(process_inst_id, tag, code, msg, overload);
+    public void updateAsyncCallbackResult(int process_inst_id, String tag,  String code, String msg, String overload){
+        asyncCallbackMsgMapper.updateCallbackResult(process_inst_id, tag, code, msg, overload);
     }
 
     public void saveEmptyAsyncCallbackMsg(int process_inst_id, String tag, String query_str){
@@ -1789,6 +1789,8 @@ public class ProcessDao {
     public int getReadyAsyncCallbackMessageCount(){
         return asyncCallbackMsgMapper.getReadyAsyncCallbackMessageCount();
     }
+
+
 
 
 

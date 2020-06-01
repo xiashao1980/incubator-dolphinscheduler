@@ -221,6 +221,8 @@ public enum Status {
     EXPORT_PROCESS_DEFINE_BY_ID_ERROR(50028,"export process definition by id error"),
     IMPORT_PROCESS_DEFINE_ERROR(50029,"import process definition error"),
 
+    CALLBACK_PROCESS_INSTANCE_ERROR(50101, "update process instance callback result error"),
+
     HDFS_NOT_STARTUP(60001,"hdfs not startup"),
     HDFS_TERANT_RESOURCES_FILE_EXISTS(60002,"resource file exists,please delete resource first"),
     HDFS_TERANT_UDFS_FILE_EXISTS(60003,"udf file exists,please delete resource first"),
@@ -244,6 +246,8 @@ public enum Status {
     COMMAND_STATE_COUNT_ERROR(80001,"task instance state count error"),
 
     QUEUE_COUNT_ERROR(90001,"queue count error"),
+
+    UPDATE_ASYNC_CALLBACKRESULT_ERROR(91001,"update async callback result error"),
 
     KERBEROS_STARTUP_STATE(100001,"get kerberos startup state error"),
     ;

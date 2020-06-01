@@ -2,6 +2,7 @@ package org.apache.dolphinscheduler.dao.entity;
 
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -14,10 +15,11 @@ import java.util.Date;
 @Data
 @TableName("t_ds_async_callback_msg")
 public class AsyncCallbackMsg {
-
+    @TableId
     @TableField("process_instance_id")
     private int processInstanceId;
 
+    @TableId
     @TableField("callback_tag")
     private String callbackTag;
 
