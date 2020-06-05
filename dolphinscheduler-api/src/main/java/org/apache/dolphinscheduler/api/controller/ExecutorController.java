@@ -171,7 +171,7 @@ public class ExecutorController extends BaseController {
         try {
             logger.info("execute command, login user: {}, project:{}, process instance id:{}, callback tag:{}",
                     loginUser.getUserName(), projectName, processInstanceId, callbackTag);
-            Map<String, Object> result = execService.callback(loginUser, projectName, processInstanceId, callbackTag, resultCode, resultOverload, resultMsg);
+            Map<String, Object> result = execService.callback(loginUser, projectName, processInstanceId, callbackTag, resultCode, resultMsg, resultOverload);
             return returnDataList(result);
         } catch (Exception e) {
             logger.error(Status.CALLBACK_PROCESS_INSTANCE_ERROR.getMsg(),e);
