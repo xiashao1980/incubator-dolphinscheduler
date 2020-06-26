@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 import java.util.Map;
 
 /**
- *  python task
+ *  python task·
  */
 public class PythonTask extends AbstractTask {
 
@@ -120,6 +120,7 @@ public class PythonTask extends AbstractTask {
     Map<String, String> params = taskProps.getDefinedParams();
     params.put("userData", taskProps.getUserData());
     params.put("taskAppId", taskProps.getTaskAppId());
+
     params.put("taskInstId", String.valueOf(taskProps.getTaskInstId()));
 
 
